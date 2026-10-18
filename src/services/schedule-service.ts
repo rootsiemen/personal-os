@@ -43,7 +43,7 @@ export function createScheduleService(
     const blocks = await store.blocks.listBy("taskId", task.id);
     const scheduled = blocks.filter((b) => b.status !== "skipped").reduce((s, b) => s + b.durationMinutes, 0);
     const remaining = task.estimatedMinutes - scheduled;
-    return remaining >= 15 ? remaining : task.estimatedMinutes;
+    return Math.max(15, remaining);
   }
 
   async function scheduleTask(taskId: string, input: ScheduleInput): Promise<ScheduleBlock> {

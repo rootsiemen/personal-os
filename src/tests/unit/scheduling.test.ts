@@ -80,6 +80,22 @@ describe("task + schedule services", () => {
     expect(await store.blocks.listBy("taskId", task.id)).toHaveLength(first.length);
   });
 
+  it("scheduleNextSlot schedules the remaining estimate, floored at 15m", async () => {
+    const { services } = setupServices(new Date(2026, 8, 24, 10));
+    await services.data.saveSettings({ dayStartMinutes: 540, dayEndMinutes: 1140, defaultBreakMinutes: 0 });
+    // Fully scheduled task: "schedule in next slot" must add a small 15m
+    // top-up, not another full-estimate block.
+    const full = await services.tasks.create({ title: "Full", estimatedMinutes: 60 });
+    await services.schedule.scheduleTask(full.id, { date: "2026-09-24", startMinutes: 540 });
+    const topUp = await services.schedule.scheduleInNextSlot(full.id, "2026-09-24");
+    expect(topUp.durationMinutes).toBe(15);
+    // Partially scheduled task: schedules the true remaining amount.
+    const partial = await services.tasks.create({ title: "Partial", estimatedMinutes: 90 });
+    await services.schedule.scheduleTask(partial.id, { date: "2026-09-24", startMinutes: 900, durationMinutes: 60 });
+    const rest = await services.schedule.scheduleInNextSlot(partial.id, "2026-09-24");
+    expect(rest.durationMinutes).toBe(30);
+  });
+
   it("rollover proposes moves and only applies after confirmation", async () => {
     const { services, store } = setupServices(new Date(2026, 8, 24, 20));
     await services.data.saveSettings({ dayStartMinutes: 540, dayEndMinutes: 1140, defaultBreakMinutes: 0 });
