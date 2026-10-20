@@ -119,14 +119,16 @@ export function computeRescheduleTargets(
     option: "tomorrow",
     label: "Tomorrow",
     date: tomorrow,
+    // When tomorrow is fully booked, degrade to "anytime" (null) instead of
+    // keepTime: suggesting the original time would overlap existing blocks,
+    // and confirming the dialog moves the block with no overlap validation.
     startMinutes:
       keepTime !== null
         ? (findSlotOnDate(blocks, tomorrow, block.durationMinutes, hours, {
             notBefore: keepTime,
             ignoreBlockId: block.id,
           }) ??
-          findSlotOnDate(blocks, tomorrow, block.durationMinutes, hours, { ignoreBlockId: block.id }) ??
-          keepTime)
+          findSlotOnDate(blocks, tomorrow, block.durationMinutes, hours, { ignoreBlockId: block.id }))
         : null,
   });
 

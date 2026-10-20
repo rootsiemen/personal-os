@@ -30,4 +30,14 @@ describe("slot finding", () => {
     expect(byOption.later_this_week.date >= "2026-09-24").toBe(true);
     expect(byOption.next_week.date).toBe("2026-09-28");
   });
+
+  it("falls back to 'anytime' instead of an overlapping time when tomorrow is full", () => {
+    const b = block("x", "2026-09-22", 600, 60); // Tue 10:00
+    const fullDay = block("busy", "2026-09-23", 540, 600); // Wed 09:00-19:00 fully booked
+    const targets = computeRescheduleTargets(b, [b, fullDay], { date: "2026-09-22", minutes: 700 }, hours, 1);
+    const tomorrow = targets.find((t) => t.option === "tomorrow")!;
+    expect(tomorrow.date).toBe("2026-09-23");
+    // Must not suggest the block's original time: it overlaps the full-day block.
+    expect(tomorrow.startMinutes).toBeNull();
+  });
 });
