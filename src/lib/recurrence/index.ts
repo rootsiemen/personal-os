@@ -56,7 +56,12 @@ export function describeRecurrence(recurrence: Recurrence): string {
         : names[weekdayOf(recurrence.startDate)];
       return `${recurrence.interval > 1 ? `${every}weeks` : "Weekly"} · ${days}`;
     }
-    case "monthly":
-      return `${recurrence.interval > 1 ? `${every}months` : "Monthly"} · day ${recurrence.dayOfMonth ?? dayOfMonth(recurrence.startDate)}`;
+    case "monthly": {
+      const day = recurrence.dayOfMonth ?? dayOfMonth(recurrence.startDate);
+      // occursOn clamps to the last day of shorter months, so the label must
+      // say so when the wanted day can exceed a month's length.
+      const clampNote = day > 28 ? " (last day in shorter months)" : "";
+      return `${recurrence.interval > 1 ? `${every}months` : "Monthly"} · day ${day}${clampNote}`;
+    }
   }
 }

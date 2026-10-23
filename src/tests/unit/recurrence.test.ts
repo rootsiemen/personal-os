@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { occurrencesInRange } from "@/lib/recurrence";
+import { describeRecurrence, occurrencesInRange } from "@/lib/recurrence";
 import type { Recurrence } from "@/types/domain";
 
 const base: Recurrence = {
@@ -38,5 +38,17 @@ describe("occurrencesInRange", () => {
   it("respects start and end dates", () => {
     const days = occurrencesInRange({ ...base, startDate: "2026-09-05", endDate: "2026-09-06" }, { from: "2026-09-01", to: "2026-09-30" });
     expect(days).toEqual(["2026-09-05", "2026-09-06"]);
+  });
+});
+
+describe("describeRecurrence", () => {
+  it("monthly day 31 notes the clamp to shorter months", () => {
+    expect(describeRecurrence({ ...base, frequency: "monthly", dayOfMonth: 31 })).toBe(
+      "Monthly · day 31 (last day in shorter months)",
+    );
+  });
+
+  it("monthly day 15 has no clamp note", () => {
+    expect(describeRecurrence({ ...base, frequency: "monthly", dayOfMonth: 15 })).toBe("Monthly · day 15");
   });
 });
