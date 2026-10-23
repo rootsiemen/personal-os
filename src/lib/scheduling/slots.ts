@@ -59,7 +59,7 @@ export function findNextAvailableSlot(
   for (let i = 0; i < horizon; i++) {
     const date = addDaysKey(fromDate, i);
     const weekday = new Date(`${date}T00:00:00`).getDay();
-    if (i > 0 && !hours.workingDays.includes(weekday)) continue;
+    if (!hours.workingDays.includes(weekday)) continue;
     const start = findSlotOnDate(blocks, date, duration, hours, {
       notBefore: i === 0 ? fromMinutes : 0,
       ignoreBlockId: options.ignoreBlockId,

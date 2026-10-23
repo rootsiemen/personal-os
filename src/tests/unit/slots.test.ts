@@ -21,6 +21,12 @@ describe("slot finding", () => {
     expect(slot).toEqual({ date: "2026-09-28", startMinutes: 540 }); // Mon
   });
 
+  it("skips the first day too when it is not a working day", () => {
+    // 2026-09-26 is a Saturday; the day is empty but must not be offered.
+    const slot = findNextAvailableSlot([], "2026-09-26", 600, 60, hours);
+    expect(slot).toEqual({ date: "2026-09-28", startMinutes: 540 }); // Mon
+  });
+
   it("computes reschedule targets for each option", () => {
     const b = block("x", "2026-09-22", 600, 60); // Tue
     const targets = computeRescheduleTargets(b, [b], { date: "2026-09-22", minutes: 700 }, hours, 1);
