@@ -76,7 +76,10 @@ export function leastLoadedDay(
   workingDays: number[],
 ): DateKey | null {
   const candidates = days.filter((d) => workingDays.includes(new Date(`${d}T00:00:00`).getDay()));
-  if (candidates.length === 0) return days[0] ?? null;
+  // No working day in the range: return null instead of falling back to a
+  // non-working day, so callers (e.g. the "Later this week" reschedule
+  // option) omit the target rather than offering a weekend day.
+  if (candidates.length === 0) return null;
   let best = candidates[0];
   let bestLoad = Infinity;
   for (const day of candidates) {
